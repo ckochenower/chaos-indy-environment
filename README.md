@@ -26,8 +26,7 @@ Run the setup script. The setup script will do the following:
    repos while logged into the vagrant VMs are effectively making changes to the
    clones in the root of this vagrant project. Commits should be authored from
    the vagrant host (not in the VM)
-
-   **indy-node**
+   1. **indy-node**:
    Shared as /vagrant/indy-node on each VM. Only the client node(s) have a
    symlink (/home/[vagrant|ubuntu]/indy-node -> /vagrant/indy-node) in the
    'vagrant' and 'ubuntu' home directories. The indy-node repo contains a
@@ -36,7 +35,7 @@ Run the setup script. The setup script will do the following:
    a clone of the indy-node repo to be present in the home directory of the
    the user running chaos experiments.
 
-   **indy-test-automation**
+   2. **indy-test-automation**:
    Shared as /vagrant/indy-test-automation on each VM. A 'cdindy' alias is
    placed in /home/[vagrant|ubuntu]/.profile for convenience. When on client
    machines (i.e. cli01), running 'cdindy' changes directory to
@@ -50,26 +49,26 @@ Run the setup script. The setup script will do the following:
    functionality. See '/vagrant/indy-test-automation/run.py --help' for
    details.
 
-   A run<repo> (i.e. replace <repo> with indy or sovrin) alias is placed in
+   A run\<repo\> (i.e. replace \<repo\> with indy or sovrin) alias is placed in
    /home/[vagrant|ubuntu]/.profile for convenience in running _**all**_ of the
    experiments in the given repo. Login to a client (i.e. cli01) and run the
    'alias' command to list all available aliases and get familiar with
-   run<repo> aliases.
+   run\<repo\> aliases.
 
-   Several monitor<suffix> (i.e. replace <suffix> with 'all', 'catchup',
+   Several monitor\<suffix\> (i.e. replace \<suffix\> with 'all', 'catchup',
    'master', 'replicas', services', etc.) aliases are placed in
    /home/[vagrant|ubuntu]/.profile for convenience in monitoring aspects of the
    pool, ledgers, etc. Login to a client (i.e. cli01) and run the
    'alias' command to list all available aliases and get familiar with
-   monitor<suffix> aliases.
+   monitor\<suffix\> aliases.
 
-   Several reset<suffix> (i.e. replace <suffix> with 'pool', etc.) aliases are
+   Several reset\<suffix\> (i.e. replace \<suffix\> with 'pool', etc.) aliases are
    placed in /home/[vagrant|ubuntu]/.profile for convenience in resetting
    aspects of the pool, ledgers, etc. Login to a client (i.e. cli01) and run
    the 'alias' command to list all available aliases and get familiar with
-   reset<suffix> aliases.
+   reset\<suffix\> aliases.
 
-   **sovrin-test-automation**
+   3. **sovrin-test-automation**:
    Shared as /vagrant/sovrin-test-automation on each VM. A 'cdsovrin' alias is
    placed in /home/[vagrant|ubuntu]/.profile for convenience. When on client
    machines (i.e. cli01), running 'cdsovrin' changes directory to
@@ -93,8 +92,8 @@ Run `vagrant up`
 
 # Login
 
-You can ssh to any of the nodes using either `vagrant ssh <host>` or
-`ssh vagrant@127.0.0.1 -p <port> -i ./ssh/id_rsa` where `./ssh/id_rsa` is the
+You can ssh to any of the nodes using either `vagrant ssh \<host\>` or
+`ssh vagrant@127.0.0.1 -p \<port\> -i ./ssh/id_rsa` where `./ssh/id_rsa` is the
 ssh key created by running the setup script. Note that the port may be different
 if the ports are already in use when you run `vagrant up`. Vagrant will pick the
 next available port to map to port 22 if the configured port (in the
@@ -130,22 +129,22 @@ ssh vagrant@127.0.0.1 -p 2203 -i ./ssh/id_rsa
 Login to the client (cli01) and run `alias` to familiarize yourself with aliases
 added for your convenience.
 In summary:
-- **cd<repo>** aliases change the working directory <repo> source directories
+- **cd\<repo\>** aliases change the working directory \<repo\> source directories
   mounted on the VM from the vagrant host.
-- **monitor<suffix>** aliases monitor aspects of the pool/ledger/etc.
-- **reset<suffix>** aliases reset aspects of the pool/ledger/etc.
-- **run<repo>** aliases run _all_ of the Chaos experiments in a repo.
+- **monitor\<suffix\>** aliases monitor aspects of the pool/ledger/etc.
+- **reset\<suffix\>** aliases reset aspects of the pool/ledger/etc.
+- **run\<repo\>** aliases run _all_ of the Chaos experiments in a repo.
 
 # Running Experiments
 See ['Executing Experiments'](https://github.com/ckochenower/indy-test-automation/blob/master/chaos/README.md#executing-experiments) for details
 In summary: There are two ways to run an experiment.
 1. Using run.py
    See '/vagrant/indy-test-automation/run.py --help' for details.
-2. Using the scripts/run-<experiment> script
+2. Using the scripts/run-\<experiment\> script
    Each experiment
-   ('/vagrant/<repo>-test-automation/chaos/experiments/<experiment>') has a
+   ('/vagrant/\<repo\>-test-automation/chaos/experiments/\<experiment\>') has a
    corresponding 'run' script
-   ('/vagrant/<repo>-test-automation/chaos/scripts/run-<experiment>')
+   ('/vagrant/\<repo\>-test-automation/chaos/scripts/run-\<experiment\>')
    See the --help output for each 'run' script for details.
 
 # Writing Experiments
@@ -153,8 +152,8 @@ See the
 [README.md](https://github.com/hyperledger/indy-test-automation/chaos/README.md)
 located in the indy-test-automation/chaos directory for details.
 Finding a similar experiment, copying it
-(<repo>/chaos/experiments/<experiment>.json) and it's associated 'run' script
-(<repo>/chaos/scripts/run-<experiment> may be a good start.
+(\<repo\>/chaos/experiments/\<experiment\>.json) and it's associated 'run' script
+(\<repo\>/chaos/scripts/run-\<experiment\> may be a good start.
 
 # Debugging Experiments
 You can place a 'import pdb; pdb.set_trace()' anywhere in python code and the
