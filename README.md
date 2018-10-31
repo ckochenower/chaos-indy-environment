@@ -8,6 +8,20 @@ are installed.
 1. Support an arbitrary number of validator nodes and clients. Perhaps by
    prompting the user for the number of clients (>1) and validator nodes (> 4),
    or reading settings from a settings/properties file.
+
+# Overview
+Topics covered in this README:
+* Installation
+  * Setup
+  * Virtualbox
+  * Vagrant
+* Login
+  * Client(s)
+  * Validator(s)
+* Aliases
+* Running Experiments
+* Writing Experiments
+* Debugging Experiments
  
 # Installation
 
