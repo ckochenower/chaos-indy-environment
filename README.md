@@ -1,4 +1,4 @@
-#Summary
+# Summary
 Sets up an Indy Chaos experiment development environment comprised of 1 client
 and 4 validator nodes. The client(s) are configured with a python virtual
 environment (chaostk) in which all dependencies for Chaos development
@@ -9,7 +9,7 @@ are installed.
    prompting the user for the number of clients (>1) and validator nodes (> 4),
    or reading settings from a settings/properties file.
  
-#Installation
+# Installation
 
 ## Setup
 Run the setup script. The setup script will do the following:
