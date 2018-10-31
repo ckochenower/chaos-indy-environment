@@ -1,0 +1,110 @@
+#!/bin/bash -e
+
+# Ensure git is installed
+echo "Checking if git is installed..."
+if ! command -v git
+then
+    echo "...git command does not exist. Install git and try again."
+    exit 1
+else
+    echo "...git is installed"
+fi
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  TARGET="$(readlink "$SOURCE")"
+  if [[ $TARGET == /* ]]; then
+    SOURCE="$TARGET"
+  else
+    DIR="$( dirname "$SOURCE" )"
+    SOURCE="$DIR/$TARGET"
+  fi
+done
+RDIR="$( dirname "$SOURCE" )"
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+if [ -d "${DIR}/ssh" ]; then
+    read -r -p "Delete and recreate directory ${DIR}/ssh? [Y/n] " input
+    if [ "${input}foo" == "foo" ]
+    then
+        echo "Defaulting to \"Y\""
+        input="Y"
+    fi
+    case $input in
+        [yY][eE][sS]|[yY])
+            echo "Removing ${DIR}/ssh..."
+            rm -rf ${DIR}/ssh
+        ;;
+        [nN][oO]|[nN])
+            echo "Skipping removal of ${DIR}/ssh..."
+        ;;
+        *)
+            echo "Invalid input..."
+            exit 1
+        ;;
+    esac
+fi
+
+echo "Creating ssh directory ${DIR}/ssh..."
+mkdir -m 700 -p ${DIR}/ssh
+
+echo "Generating RSA key pair..."
+ssh-keygen -t rsa -N "" -f ${DIR}/ssh/id_rsa #-e -m pem
+
+echo "Generating PEM file from RSA key pair..."
+echo "Generating PEM file from RSA public key..."
+ssh-keygen -f ${DIR}/ssh/id_rsa -e -m pem > ${DIR}/ssh/chaos.pem
+echo "Securing PEM file before appending private key..."
+chmod 600 ${DIR}/ssh/chaos.pem
+echo "Appending RSA private key to PEM file..."
+cat ${DIR}/ssh/id_rsa >> ${DIR}/ssh/chaos.pem
+
+# Note: Associative arrays were introduced in bash 4.0
+#       Mac uses a sub-4.0 version of bash :(. Therefore, we are required to an
+#       array and making assumptions about the URL.
+SOURCES=(
+  'indy-node'
+  'indy-test-automation'
+  'sovrin-test-automation'
+)
+
+# Default username to empty string
+github_username=""
+
+echo "Ensuring all chaos source repos are present..."
+for repo in "${SOURCES[@]}"
+do
+  echo "Checking if directory ${DIR}/${repo} exists..."
+  if [[ ! -d "${DIR}/${repo}" ]]; then
+    echo "Directory ${DIR}/${repo} does not exist."
+    if [ "${github_username}foo" = "foo" ]
+    then
+      read -r -p "Please enter your github username: " github_username
+    fi
+    url="https://github.com/${github_username}/${repo}.git"
+    read -r -p "Clone ${repo} project (${url})? [Y/n] " input
+    if [ "${input}foo" == "foo" ]
+    then
+      echo "Defaulting to \"Y\""
+      input="Y"
+    fi
+    case $input in
+      [yY][eE][sS]|[yY])
+        echo "Cloning the ${repo} repo..."
+        git clone ${url} ${DIR}/${repo}
+      ;;
+      [nN][oO]|[nN])
+        echo "Skipped git clone of ${repo} repo (${url})."
+      ;;
+      *)
+        echo "Invalid input. Run setup again."
+        exit 1
+      ;;
+    esac
+  else
+    echo "Directory ${DIR}/${repo} exists."
+  fi
+done
+
+echo ""
+echo "Setup complete"

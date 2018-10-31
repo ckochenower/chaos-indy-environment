@@ -1,0 +1,10 @@
+127.0.0.1	localhost
+127.0.1.1	vagrant
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+10.20.30.101	cli01.sovrin.lab cli01
+10.20.30.201	validator01.sovrin.lab validator01 Node1.sovrin.lab Node1
+10.20.30.202	validator02.sovrin.lab validator02 Node2.sovrin.lab Node2
+10.20.30.203	validator03.sovrin.lab validator03 Node3.sovrin.lab Node3
+10.20.30.204	validator04.sovrin.lab validator04 Node4.sovrin.lab Node4

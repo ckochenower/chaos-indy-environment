@@ -1,0 +1,20 @@
+Host cli01
+    User <USERNAME>
+    Hostname 10.20.30.101
+    IdentityFile /home/<USERNAME>/.ssh/id_rsa
+Host validator01
+    User <USERNAME>
+    Hostname 10.20.30.201
+    IdentityFile /home/<USERNAME>/.ssh/id_rsa
+Host validator02
+    User <USERNAME>
+    Hostname 10.20.30.202
+    IdentityFile /home/<USERNAME>/.ssh/id_rsa
+Host validator03
+    User <USERNAME>
+    Hostname 10.20.30.203
+    IdentityFile /home/<USERNAME>/.ssh/id_rsa
+Host validator04
+    User <USERNAME>
+    Hostname 10.20.30.204
+    IdentityFile /home/<USERNAME>/.ssh/id_rsa

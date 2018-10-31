@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# repos
+/indy-node
+/indy-test-automation
+/sovrin-test-automation
+
+# Exclude auto-generated (by setup script) ssh directory
+/ssh
