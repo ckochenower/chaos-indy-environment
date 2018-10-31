@@ -144,9 +144,10 @@ ssh vagrant@127.0.0.1 -p 2203 -i ./ssh/id_rsa
 Login to the client (cli01) and run `alias` to familiarize yourself with aliases
 added for your convenience.
 In summary:
-- **cd\<repo\>** aliases change the working directory \<repo\> source directories
-  mounted on the VM from the vagrant host.
-- **monitor\<suffix\>** aliases monitor aspects of the pool/ledger/etc.
+- **cd\<repo\>** aliases change the working directory to the \<repo\> source
+  directory mounted on the VM from the vagrant host.
+- **monitor\<suffix\>** aliases monitor aspects of the pool/ledger/etc;
+  producing human readable tabluar output refreshed periodically.
 - **reset\<suffix\>** aliases reset aspects of the pool/ledger/etc.
 - **run\<repo\>** aliases run _all_ of the Chaos experiments in a repo.
 
