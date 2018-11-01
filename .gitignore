@@ -110,3 +110,6 @@ venv.bak/
 
 # Exclude auto-generated (by setup script) ssh directory
 /ssh
+
+# Exclude vagrant artifacts that should not be under version control
+/.vagrant
