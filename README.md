@@ -1,13 +1,20 @@
 # Summary
-Sets up an Indy Chaos experiment development environment comprised of 1 client
-and 4 validator nodes. The client(s) are configured with a python virtual
-environment (chaostk) in which all dependencies for Chaos development
-are installed.
+A Vagrant + Virtualbox project that sets up an Indy Chaos experiment development
+environment comprised of 1 client and 4 validator nodes. The client(s) are
+configured with a python virtual environment (chaostk) in which all dependencies
+for Chaos development are installed.
 
 # TODOs
 1. Support an arbitrary number of validator nodes and clients. Perhaps by
    prompting the user for the number of clients (>1) and validator nodes (> 4),
    or reading settings from a settings/properties file.
+2. SCM enhancements:
+   Many of the following may be solved with a settings/properties file that gets
+   set when first running `setup`.
+   1. Allow the branch to be set for each repo instead of assuming the default
+   2. Use a clone anywhere on disk by mounting repo clones to /src/<repo> on the
+      VM instead of relying on the auto-mount of the project dir to /vagrant on
+      the VM.
 
 # Overview
 Topics covered in this README:
@@ -24,6 +31,20 @@ Topics covered in this README:
 * Debugging Experiments
  
 # Installation
+
+# Source Control Management (SCM)
+The standard Github Fork & Pull Request Workflow is required. Fork the following
+projects:
+[**indy-node**](https://github.com/hyperledger/indy-node)
+[**indy-test-automation**](https://github.com/hyperledger/indy-test-automation)
+[**sovrin-test-automation**](https://github.com/sovrin-foundation/sovrin-test-automation)
+
+The `setup` script in the following section will clone the 'default' (typically
+master) branch from _your_ fork of the above repos. If you want to use a
+different branch for one or more of the repos, you can either clone each of the
+repos into the root of this project (same directory as the Vagrantfile) and set
+the branch, or you can let the setup script clone the repos and you can set the
+branch before running `vagrant up`.
 
 ## Setup
 Run the setup script. The setup script will do the following:
