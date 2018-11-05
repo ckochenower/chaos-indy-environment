@@ -5,6 +5,8 @@ configured with a python virtual environment (chaostk) in which all dependencies
 for Chaos development are installed.
 
 # TODOs
+Please consider completing the following as part of your efforts to contribute
+to this project.
 1. Support an arbitrary number of validator nodes and clients. Perhaps by
    prompting the user for the number of clients (>1) and validator nodes (> 4),
    or reading settings from a settings/properties file.
@@ -15,11 +17,79 @@ for Chaos development are installed.
    2. Use a clone anywhere on disk by mounting repo clones to /src/<repo> on the
       VM instead of relying on the auto-mount of the project dir to /vagrant on
       the VM.
+   The following is a sample properties file that will work with the bash
+   'setup' script. 'path' is required. All other properties are optional.
+   ```
+   # Indy Node
+   repos.indy.node.path=
+   repos.indy.node.url=git@github.com:<USERNAME>/indy-node.git
+   repos.indy.node.git.private.key=~/.ssh/id_rsa
+   repos.indy.node.branch=master
+
+   # Indy Test Automation
+   repos.indy.test.automation.path=
+   repos.indy.test.automation.url=git@github.com:<USERNAME>/indy-test-automation.git
+   repos.indy.test.automation.git.private.key=~/.ssh/id_rsa
+   repos.indy.test.automation.branch=master
+
+   # Sovrin Test Automation
+   repos.sovrin.test.automation.path=
+   repos.sovrin.test.automation.url=git@github.com:<USERNAME>/sovrin-test-automation.git
+   repos.sovrin.test.automation.git.private.key=~/.ssh/id_rsa
+   repos.sovrin.test.automation.branch=master
+   ```
+   **OR**
+   The following is a sample properties file that will work with python version
+   of the 'setup' script. 'path' is required. All other properties are optional.
+   ```
+   [indy.node]
+   Path =
+   Username = 
+   Url = git@github.com:<USERNAME>/indy-node.git
+   PrivateKey = ~/.ssh/id_rsa
+   Branch = master
+
+   [indy.test.automation]
+   Path =
+   Username = 
+   Url = git@github.com:<USERNAME>/indy-test-automation.git
+   PrivateKey = ~/.ssh/id_rsa
+   Branch = master
+
+   [sovrin.test.automation]
+   Path =
+   Username = 
+   Url = git@github.com:<USERNAME>/sovrin-test-automation.git
+   PrivateKey = ~/.ssh/id_rsa
+   Branch = master
+   ```
+   Pseudo Code:
+   for each <repo name> derived from repos.<repo name>.path (bash) or
+   [<repo name>] (python) where '.' is converted '-'. Examples from sample
+   properties files (bash and python) above include: indy.node => indy-node,
+   indy.test.automation => indy-test-automation,
+   sovrin.test.automation => sovrin-test-automation)
+      if 'path' is unset
+         # Check if the clone already exists
+         if the clone (indy-node, indy-test-automation, ...) is present in the
+         vagrant project root directory
+            Capture the path
+         else
+            # Ask if the repo should be cloned or if a clone already exists on
+            # the user's machine
+            if clone exists
+               prompt for the path
+            else
+               if '<USERNAME>' is present in the 'url' property
+                  prompt for the user's github username
+               clone the repo
+         update the 'path' property
+      
 
 # Overview
 Topics covered in this README:
 * Installation
-  * Setup
+  * Setup - Please consider completing TODOs
   * Virtualbox
   * Vagrant
 * Login
@@ -44,7 +114,8 @@ master) branch from _your_ fork of the above repos. If you want to use a
 different branch for one or more of the repos, you can either clone each of the
 repos into the root of this project (same directory as the Vagrantfile) and set
 the branch, or you can let the setup script clone the repos and you can set the
-branch before running `vagrant up`.
+branch before running `vagrant up`. See the 'SCM enhancements' tasks under the
+TODO section above for a proposed way of improving the setup experience.
 
 ## Setup
 Run the setup script. The setup script will do the following:
@@ -59,8 +130,8 @@ Run the setup script. The setup script will do the following:
    project (where the Vagrantfile is located) are shared (bi-directionally) on
    each VM in the /vagrant directory. In other words, changes made to these
    repos while logged into the vagrant VMs are effectively making changes to the
-   clones in the root of this vagrant project. Commits should be authored from
-   the vagrant host (not in the VM)
+   clones in the root of this vagrant project. Commits should be authored/ushed
+   from the vagrant host (not in the VM)
 
    1. **indy-node**:
       Shared as /vagrant/indy-node on each VM. Only the client node(s) have a
@@ -142,6 +213,14 @@ can configure each VM in the Vagrantfile to use specific ports.
 vagrant ssh cli01
 ```
 ### SSH
+Note that when Vagrant maps port 22 (SSH) on the Vagrant guest (VM) to a port on
+the Vagrant host (your machine - typically port 2222). The port numbers
+may be different if Vagrant detects a collision (port already in use). If a
+collision is detected, Vagrant assigns an available port
+(i.e. 2200,2201,...,2221) and noitifies you of the collision and the unique port
+mapping via stdout/stderr. This is likely a design choice by the Vagrant folks,
+because `vagrant ssh <VM>` is the typical way a user will SSH to a Vagrant
+managed VM.
 ```
 ssh vagrant@127.0.0.1 -p 2222 -i ./ssh/id_rsa
 ```
@@ -154,6 +233,14 @@ vagrant ssh validator03
 vagrant ssh validator04
 ```
 ### SSH
+Note that when Vagrant maps port 22 (SSH) on the Vagrant guest (VM) to a port on
+the Vagrant host (your machine - typically port 2222). The port numbers
+may be different if Vagrant detects a collision (port already in use). If a
+collision is detected, Vagrant assigns an available port
+(i.e. 2200,2201,...,2221) and noitifies you of the collision and the unique port
+mapping via stdout/stderr. This is likely a design choice by the Vagrant folks,
+because `vagrant ssh <VM>` is the typical way a user will SSH to a Vagrant
+managed VM.
 ```
 ssh vagrant@127.0.0.1 -p 2200 -i ./ssh/id_rsa
 ssh vagrant@127.0.0.1 -p 2201 -i ./ssh/id_rsa
