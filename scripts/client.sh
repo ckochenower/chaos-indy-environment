@@ -190,14 +190,31 @@ do
     "sovrin"
   )
 
+  run_all_paths=
   for repo in "${repos[@]}"
   do
     aliasname="cd${repo}"
     if ! grep -q ${aliasname} "${profilefile}"; then
       echo alias cd${repo}="\"cd /vagrant/${repo}-test-automation/chaos\"" >> ${profilefile}
       echo alias run${repo}="\"cd /vagrant/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [\\\"/vagrant/${repo}-test-automation/chaos\\\"]}'\"" >> ${profilefile}
-    fi
+      if [ "${run_all_paths}" == "" ]
+        then
+          run_all_paths="\\\"/vagrant/${repo}-test-automation/chaos\\\""
+        else
+          run_all_paths="${run_all_paths}, \\\"/vagrant/${repo}-test-automation/chaos\\\""
+        fi
+      fi
   done
+
+  # Add runall if not already in profilefile
+  if ! grep -q "runall" "${profilefile}"
+  then
+    # Add runall if run_all_paths is not empty
+    if [ ! -z "${run_all_paths}" ]
+    then
+      echo alias runall="\"cd /vagrant/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [${run_all_paths}]}'\"" >> ${profilefile}
+    fi
+  fi
 
   # Aliases convenient for monitoring pool stats using 'watch' command
   monitors=(
