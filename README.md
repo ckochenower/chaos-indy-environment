@@ -7,9 +7,6 @@ for Chaos development are installed.
 # TODOs
 Please consider completing the following as part of your efforts to contribute
 to this project.
-1. Support an arbitrary number of validator nodes and clients. Perhaps by
-   prompting the user for the number of clients (>1) and validator nodes (> 4),
-   or reading settings from a settings/properties file.
 2. Copy the users ~/.vimrc to each VM if it exists on the Vagrant host. If one
    does not exist, copy the following at minimum to encourage some best
    practices for column width:
@@ -274,9 +271,9 @@ In summary: There are two ways to run an experiment.
 2. Using the scripts/run-\<experiment\> script
    Each experiment
    ('/vagrant/\<repo\>-test-automation/chaos/experiments/\<experiment\>') has a
-   corresponding 'run' script
+   corresponding 'run-<experiment>' script in the 'scripts' directory.
    ('/vagrant/\<repo\>-test-automation/chaos/scripts/run-\<experiment\>')
-   See the --help output for each 'run' script for details.
+   See the --help output for each 'run-<experiment>' script for details.
 
 # Writing Experiments
 See the
