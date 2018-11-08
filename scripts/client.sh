@@ -1,12 +1,12 @@
 #!/bin/bash
 
 display_usage() {
-	echo "Usage:\t$0 <TIMEZONE> "
-	echo "EXAMPLE: $0 /usr/share/zoneinfo/America/Denver"
+	echo "Usage:\t$0 <TIMEZONE> <NODEIPLIST> <NODECOUNT> <CLIENTCOUNT> <REPO>"
+	echo "EXAMPLE: $0 /usr/share/zoneinfo/America/Denver 10.20.30.201,10.20.30.202,10.20.30.203,10.20.30.204 4 4 stable"
 }
 
 # if less than one argument is supplied, display usage
-if [  $# -ne 3 ]
+if [  $# -ne 5 ]
 then
     display_usage
     exit 1
@@ -14,10 +14,14 @@ fi
 
 TIMEZONE=$1
 NODEIPLIST=$2
-REPO=$3
+NODECOUNT=$3
+CLIENTCOUNT=$4
+REPO=$5
 
 echo "TIMEZONE=${TIMEZONE}"
 echo "NODEIPLIST=${NODEIPLIST}"
+echo "NODECOUNT=${NODECOUNT}"
+echo "CLIENTCOUNT=${CLIENTCOUNT}"
 echo "REPO=${REPO}"
 
 #--------------------------------------------------------
@@ -99,10 +103,20 @@ for username in "${usernames[@]}"
 do
   # Create user
   useradd ${username}
+
+  # Setup pool directory in user's home directory
+  echo 'Copy generated (by Vagrantfile) pool (pool1) directory required by Chaos experiments'
+  mkdir -m 700 -p /home/${username}/pool1
+  cp -rf /vagrant/pool1/* /home/${username}/pool1/
+  chmod 600 /home/${username}/pool1/ssh_config
+  sed -i.bak s/\<USERNAME\>/${username}/g /home/${username}/pool1/ssh_config
+  chmod 644 /home/${username}/pool1/clients
+  chown -R ${username} /home/${username}/pool1
+
+  # Setup ssh
   mkdir -m 700 -p /home/${username}/.ssh
   cp -f /vagrant/ssh/id_rsa* /home/${username}/.ssh/
-  cp -f /vagrant/ssh_config /home/${username}/.ssh/config
-  sed -i.bak s/\<USERNAME\>/${username}/g /home/${username}/.ssh/config
+  cp -f /home/${username}/pool1/ssh_config /home/${username}/.ssh/config
   PUB_KEY=$(cat /home/${username}/.ssh/id_rsa.pub)
   grep -q -F "${PUB_KEY}" /home/${username}/.ssh/authorized_keys 2>/dev/null || echo "${PUB_KEY}" >> /home/${username}/.ssh/authorized_keys
   chmod 600 /home/${username}/.ssh/authorized_keys
@@ -110,18 +124,12 @@ do
 
   # Generate the pool_transactions_genesis file
   echo 'Generating Genesis Transaction Files required by Chaos experiments for user ${username}'
-  su - ${username} -c "generate_indy_pool_transactions --nodes 4 --clients 4 --ips ${NODEIPLIST}"
+  su - ${username} -c "generate_indy_pool_transactions --nodes ${NODECOUNT} --clients ${CLIENTCOUNT} --ips ${NODEIPLIST}"
 
-  # Setup pool directory in user's home directory
-  echo 'Generate pool (pool1) directory required by Chaos experiments'
-  mkdir -m 700 -p /home/${username}/pool1
-  cp -f /home/${username}/.ssh/config /home/${username}/pool1/ssh_config
-  chmod 600 /home/${username}/pool1/ssh_config
+  # Copy the generated pool_transactions_genesis file into the pool1 directory
+  echo 'Copy the generated pool_transactions_genesis fil into /home/${username}/pool1/'
   cp -f /home/${username}/.indy-cli/networks/sandbox/pool_transactions_genesis /home/${username}/pool1/
   chmod 644 /home/${username}/pool1/pool_transactions_genesis
-  echo '["cli01"]' > /home/${username}/pool1/clients
-  chmod 644 /home/${username}/pool1/clients
-  chown -R ${username} /home/${username}/pool1
 
   # Give the user passwordless sudo
   echo "Give user ${username} passwordless sudo rights..."

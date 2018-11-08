@@ -1,25 +1,27 @@
 #!/bin/bash
 
 display_usage() {
-	echo -e "Usage:\t$0 <NODENAME> <NODEIP> <NODEPORT> <CLIENTIP> <CLIENTPORT> <TIMEZONE>"
-	echo -e "EXAMPLE: $0 Node1 0.0.0.0 9701 0.0.0.0 9702 /usr/share/zoneinfo/America/Denver"
+	echo -e "Usage:\t$0 <NODENAME> <NODEIP> <NODEPORT> <CLIENTIP> <CLIENTPORT> <TIMEZONE> <NODEIPLIST> <NODECOUNT> <CLIENTCOUNT> <REPO>"
+	echo -e "EXAMPLE: $0 Node1 0.0.0.0 9701 0.0.0.0 9702 /usr/share/zoneinfo/America/Denver 10.20.30.201,10.20.30.202,10.20.30.203,10.20.30.204 4 4 stable"
 }
 
 # if less than one argument is supplied, display usage
-if [  $# -ne 8 ]
+if [  $# -ne 10 ]
 then
     display_usage
     exit 1
 fi
 
-HOSTNAME=$1
-NODEIP=$2
-NODEPORT=$3
-CLIENTIP=$4
-CLIENTPORT=$5
-TIMEZONE=$6
-NODEIPLIST=$7
-REPO=$8
+HOSTNAME=${1}
+NODEIP=${2}
+NODEPORT=${3}
+CLIENTIP=${4}
+CLIENTPORT=${5}
+TIMEZONE=${6}
+NODEIPLIST=${7}
+NODECOUNT=${8}
+CLIENTCOUNT=${9}
+REPO=${10}
 
 echo "HOSTNAME=$HOSTNAME"
 echo "NODEIP=$NODEIP"
@@ -28,6 +30,8 @@ echo "CLIENTIP=$CLIENTIP"
 echo "CLIENTPORT=$CLIENTPORT"
 echo "TIMEZONE=$TIMEZONE"
 echo "NODEIPLIST=$NODEIPLIST"
+echo "NODECOUNT=$NODECOUNT"
+echo "CLIENTCOUNT=$CLIENTCOUNT"
 echo "REPO=$REPO"
 
 #--------------------------------------------------------
@@ -96,10 +100,12 @@ mv /tmp/indy_config.py /etc/indy/indy_config.py
 #--------------------------------------------------------
 [[ $HOSTNAME =~ [^0-9]*([0-9]*) ]]
 NODENUM=${BASH_REMATCH[1]}
-echo "Setting Up Indy Node Number $NODENUM"
+echo "Setting Up $HOSTNAME as Indy Node Number $NODENUM"
+echo "Node IP/PORT: $NODEIP $NODEPORT"
+echo "Client IP/PORT: $CLIENTIP $CLIENTPORT"
 su - indy -c "init_indy_node $HOSTNAME $NODEIP $NODEPORT $CLIENTIP $CLIENTPORT"  # set up /etc/indy/indy.env
 echo "Generating indy pool transactions"
-su - indy -c "generate_indy_pool_transactions --nodes 4 --clients 4 --nodeNum $NODENUM --ips $NODEIPLIST"
+su - indy -c "generate_indy_pool_transactions --nodes ${NODECOUNT} --clients ${CLIENTCOUNT} --nodeNum $NODENUM --ips ${NODEIPLIST}"
 
 #--------------------------------------------------------
 echo 'Fixing Bugs'
@@ -134,10 +140,20 @@ for username in "${usernames[@]}"
 do
   # Create user
   useradd ${username}
+
+  # Setup pool directory in user's home directory
+  echo 'Copy generated (by Vagrantfile) pool (pool1) directory required by Chaos experiments'
+  mkdir -m 700 -p /home/${username}/pool1
+  cp -rf /vagrant/pool1/* /home/${username}/pool1/
+  chmod 600 /home/${username}/pool1/ssh_config
+  sed -i.bak s/\<USERNAME\>/${username}/g /home/${username}/pool1/ssh_config
+  chmod 644 /home/${username}/pool1/clients
+  chown -R ${username} /home/${username}/pool1
+
+  # Setup ssh
   mkdir -m 700 -p /home/${username}/.ssh
   cp -f /vagrant/ssh/id_rsa* /home/${username}/.ssh/
-  cp -f /vagrant/ssh_config /home/${username}/.ssh/config
-  sed -i.bak s/\<USERNAME\>/${username}/g /home/${username}/.ssh/config
+  cp -f /home/${username}/pool1/ssh_config /home/${username}/.ssh/config
   PUB_KEY=$(cat /home/${username}/.ssh/id_rsa.pub)
   grep -q -F "${PUB_KEY}" /home/${username}/.ssh/authorized_keys 2>/dev/null || echo "${PUB_KEY}" >> /home/${username}/.ssh/authorized_keys
   chmod 600 /home/${username}/.ssh/authorized_keys
@@ -145,7 +161,12 @@ do
 
   # Generate the pool_transactions_genesis file
   echo 'Generating Genesis Transaction Files required by Chaos experiments for user ${username}'
-  su - ${username} -c "generate_indy_pool_transactions --nodes 4 --clients 4 --ips ${NODEIPLIST}"
+  su - ${username} -c "generate_indy_pool_transactions --nodes ${NODECOUNT} --clients ${CLIENTCOUNT} --ips ${NODEIPLIST}"
+
+  # Copy the generated pool_transactions_genesis file into the pool1 directory
+  echo 'Copy the generated pool_transactions_genesis fil into /home/${username}/pool1/'
+  cp -f /home/${username}/.indy-cli/networks/sandbox/pool_transactions_genesis /home/${username}/pool1/
+  chmod 644 /home/${username}/pool1/pool_transactions_genesis
 
   # Give the user passwordless sudo
   echo "${username} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/chaos_${username}
@@ -154,7 +175,5 @@ done
 
 #--------------------------------------------------------
 echo 'Cleaning Up'
-rm /etc/update-motd.d/10-help-text
-rm /etc/update-motd.d/97-overlayroot
 apt-get update
 updatedb

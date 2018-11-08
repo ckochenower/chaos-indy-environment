@@ -1,5 +1,47 @@
 #!/bin/bash -e
 
+# Begin helper functions
+function get_property()
+{
+  echo $(grep ^${1} ${DIR}/config.properties | cut -d"=" -f2)
+}
+
+function set_int_property()
+{
+  name=${1}
+  min=${2}
+  max=${3}
+  default=${4}
+  message=${5}
+
+  if [[ "${min}" -eq "-1" ]]
+  then
+    min="–2147483648"
+  fi
+  if [[ "${max}" -eq "-1" ]]
+  then
+    max="2147483647"
+  fi
+  
+  while read -p "${message} " int_value; do
+    if [ -z "${int_value}" ]
+    then
+       echo "Using default of ${default}"
+       int_value="${default}"
+    fi
+
+    if [[ "${int_value}" -lt ${min} || "${int_value}" -gt ${max} ]]
+    then
+      echo "${int_value} must be a number between ${min} and ${max} inclusive."
+      continue
+    fi
+    break
+  done
+  echo "Setting ${name}=${int_value} in ${DIR}/config.properties..."
+  sed -i '' -e "s/^${name}=.*$/${name}=${int_value}/g" ${DIR}/config.properties
+}
+# End helper functions
+
 # Ensure git is installed
 echo "Checking if git is installed..."
 if ! command -v git
@@ -60,13 +102,9 @@ echo "Appending RSA private key to PEM file..."
 cat ${DIR}/ssh/id_rsa >> ${DIR}/ssh/chaos.pem
 
 # Note: Associative arrays were introduced in bash 4.0
-#       Mac uses a sub-4.0 version of bash :(. Therefore, we are required to an
-#       array and making assumptions about the URL.
-SOURCES=(
-  'indy-node'
-  'indy-test-automation'
-  'sovrin-test-automation'
-)
+#       Mac uses a sub-4.0 version of bash :(. Therefore, we are required to use
+#       an array and making assumptions about the URL.
+SOURCES=($(grep ^repos ${DIR}/config.properties | grep \.url=  | cut -d"=" -f1 | cut -d"." -f2- | rev | cut -d"." -f2- | rev | tr "." "-"))
 
 # Default username to empty string
 github_username=""
@@ -105,6 +143,22 @@ do
     echo "Directory ${DIR}/${repo} exists."
   fi
 done
+
+# Make sure client.count is set in config.properties
+client_count=$(get_property 'client.count')
+if [ "${client_count}" == "<CLIENTCOUNT>" ]
+then
+  message="How many client nodes should be created? (default: 1)"
+  set_int_property "client.count" 1 5 1 "${message}"
+fi
+
+# Make sure validator.count is set in config.properties
+validator_count=$(get_property 'validator.count')
+if [ "${validator_count}" == "<VALIDATORCOUNT>" ]
+then
+  message="How many validator nodes should be created? (default: 4)"
+  set_int_property "validator.count" 4 25 4 "${message}"
+fi
 
 echo ""
 echo "Setup complete"
