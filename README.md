@@ -1,8 +1,11 @@
 # Summary
 A Vagrant + Virtualbox project that sets up an Indy Chaos experiment development
-environment comprised of 1 client and 4 validator nodes. The client(s) are
-configured with a python virtual environment (chaostk) in which all dependencies
-for Chaos development are installed.
+environment comprised of 1 or more clients and 4 or more validator nodes. The
+client(s) are configured with a python virtual environment (chaostk) in which
+all dependencies for Chaos development are installed. The chaostk virtual
+environment is activated/sourced on login and numerous aliases are available for
+your convenience. See /home/[vagrant/ubuntu]/.profile on any of the VMs for
+details.
 
 # TODOs
 Please consider completing the following as part of your efforts to contribute
@@ -135,8 +138,8 @@ Run the setup script. The setup script will do the following:
    project (where the Vagrantfile is located) are shared (bi-directionally) on
    each VM in the /vagrant directory. In other words, changes made to these
    repos while logged into the vagrant VMs are effectively making changes to the
-   clones in the root of this vagrant project. Commits should be authored/ushed
-   from the vagrant host (not in the VM)
+   clones in the root of this vagrant project. Commits should be authored/pushed
+   from the vagrant host (not from the VM).
 
    1. **indy-node**:
       Shared as /vagrant/indy-node on each VM. Only the client node(s) have a
@@ -144,13 +147,13 @@ Run the setup script. The setup script will do the following:
       'vagrant' and 'ubuntu' home directories. The indy-node repo contains a
       perf_processes.py batch script used for load/stress testing and is used by
       Chaos experiments to generate load when needed. The Choas experiments
-      expect a clone of the indy-node repo to be present in the home directory
-      of the the user running chaos experiments.
+      expect a clone of the indy-node repo to be present on each client node in
+      the home directory of the the user running chaos experiments.
 
    2. **indy-test-automation**:
       Shared as /vagrant/indy-test-automation on each VM. A 'cdindy' alias is
       placed in /home/[vagrant|ubuntu]/.profile for convenience. When on client
-      machines (i.e. cli01), running 'cdindy' changes directory to
+      machines (i.e. cli1), running 'cdindy' changes directory to
       /vagrant/indy-test-automation/chaos.
 
       Chaos experiments are found under the 'chaos' directory. This project has
@@ -163,27 +166,27 @@ Run the setup script. The setup script will do the following:
 
       A run\<repo\> (i.e. replace \<repo\> with indy or sovrin) alias is placed
       in /home/[vagrant|ubuntu]/.profile for convenience in running _**all**_ of
-      the experiments in the given repo. Login to a client (i.e. cli01) and run
+      the experiments in the given repo. Login to a client (i.e. cli1) and run
       the 'alias' command to list all available aliases and get familiar with
       run\<repo\> aliases.
 
       Several monitor\<suffix\> (i.e. replace \<suffix\> with 'all', 'catchup',
       'master', 'replicas', services', etc.) aliases are placed in
       /home/[vagrant|ubuntu]/.profile for convenience in monitoring aspects of
-      the pool, ledgers, etc. Login to a client (i.e. cli01) and run the
+      the pool, ledgers, etc. Login to a client (i.e. cli1) and run the
       'alias' command to list all available aliases and get familiar with
       monitor\<suffix\> aliases.
 
       Several reset\<suffix\> (i.e. replace \<suffix\> with 'pool', etc.)
       aliases are placed in /home/[vagrant|ubuntu]/.profile for convenience in
       resetting aspects of the pool, ledgers, etc. Login to a client
-      (i.e. cli01) and run the 'alias' command to list all available aliases and
+      (i.e. cli1) and run the 'alias' command to list all available aliases and
       get familiar with reset\<suffix\> aliases.
 
    3. **sovrin-test-automation**:
       Shared as /vagrant/sovrin-test-automation on each VM. A 'cdsovrin' alias
       is placed in /home/[vagrant|ubuntu]/.profile for convenience. When on
-      client machines (i.e. cli01), running 'cdsovrin' changes directory to
+      client machines (i.e. cli1), running 'cdsovrin' changes directory to
       /vagrant/sovrin-test-automation/chaos.
 
       Chaos experiments are found under the 'chaos' directory.
@@ -215,7 +218,7 @@ can configure each VM in the Vagrantfile to use specific ports.
 ## Client(s)
 ### Vagrant
 ```
-vagrant ssh cli01
+vagrant ssh cli1
 ```
 ### SSH
 Note that when Vagrant maps port 22 (SSH) on the Vagrant guest (VM) to a port on
@@ -232,10 +235,10 @@ ssh vagrant@127.0.0.1 -p 2222 -i ./ssh/id_rsa
 ## Validator(s)
 ### Vagrant
 ```
-vagrant ssh validator01
-vagrant ssh validator02
-vagrant ssh validator03
-vagrant ssh validator04
+vagrant ssh validator1
+vagrant ssh validator2
+vagrant ssh validator3
+vagrant ssh validator4
 ```
 ### SSH
 Note that when Vagrant maps port 22 (SSH) on the Vagrant guest (VM) to a port on
@@ -254,7 +257,7 @@ ssh vagrant@127.0.0.1 -p 2203 -i ./ssh/id_rsa
 ```
 
 # Aliases
-Login to the client (cli01) and run `alias` to familiarize yourself with aliases
+Login to the client (cli1) and run `alias` to familiarize yourself with aliases
 added for your convenience.
 In summary:
 - **cd\<repo\>** aliases change the working directory to the \<repo\> source

@@ -87,6 +87,13 @@ if [ -d "${DIR}/ssh" ]; then
     esac
 fi
 
+# Create a config.properties file if it does not yet exist.
+if [ ! -f "${DIR}/config.properties" ]
+then
+  echo "Creating config.properties..."
+  cp ${DIR}/config.properties.template ${DIR}/config.properties
+fi
+
 echo "Creating ssh directory ${DIR}/ssh..."
 mkdir -m 700 -p ${DIR}/ssh
 
