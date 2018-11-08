@@ -7,14 +7,15 @@ for Chaos development are installed.
 # TODOs
 Please consider completing the following as part of your efforts to contribute
 to this project.
-2. Copy the users ~/.vimrc to each VM if it exists on the Vagrant host. If one
+
+1. Copy the users ~/.vimrc to each VM if it exists on the Vagrant host. If one
    does not exist, copy the following at minimum to encourage some best
    practices for column width:
    ```
    highlight OverLength ctermbg=black ctermfg=white guibg=#592929
    match OverLength /\%81v.\+/
    ```
-3. SCM enhancements:
+2. SCM enhancements:
    Many of the following may be solved with a settings/properties file that gets
    set when first running `setup`.
    1. Allow the branch to be set for each repo instead of assuming the default
