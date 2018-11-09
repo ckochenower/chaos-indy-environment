@@ -16,6 +16,11 @@
 # clone the repo for you.
 #repos.<REPO>.path=<PATH TO CLONED REPO DIRECTORY>
 
+# Username
+# ~~~~
+# The username to use when interacting with the repo defined in the URL property
+#repos.<REPO>.username=<USERNAME>
+
 # URL
 # ~~~~
 # Where to clone a copy of the repository. You will be prompted for a username
@@ -37,12 +42,14 @@
 
 # Indy Node
 repos.indy.node.path=
+repos.indy.node.username=
 repos.indy.node.url=git@github.com:<USERNAME>/indy-node.git
 repos.indy.node.branch=
 repos.indy.node.sharedfolder.type=
 
 # Indy Test Automation
 repos.indy.test.automation.path=
+repos.indy.test.automation.username=
 repos.indy.test.automation.url=git@github.com:<USERNAME>/indy-test-automation.git
 repos.indy.test.automation.branch=
 repos.indy.test.automation.sharedfolder.type=
@@ -52,6 +59,7 @@ repos.indy.test.automation.sharedfolder.type=
 #              indy-node and indy-test-automation repos above are examples.
 # <REPO> Test Automation
 #repos.<REPO>.path=
+#repos.<REPO>.username=
 #repos.<REPO>.url=git@github.com:<USERNAME>/sovrin-test-automation.git
 #repos.<REPO>.branch=master
 #repos.<REPO>.sharedfolder.type=
