@@ -139,7 +139,7 @@ do
   # sufficient). Needed for loading the cluster with traffic using the
   # indy-node/scripts/performance/perf_load/perf_processes.py script.
   echo "Creating synlink to indy-node in ${username}'s home directory..."
-  ln -sf /vagrant/indy-node /home/${username}/indy-node
+  ln -sf /src/indy-node /home/${username}/indy-node
 
   # Create a Chaos python virtualenv
   echo "Setting up Chaos python virtualenv..."
@@ -159,25 +159,25 @@ do
 
   # Force all requirements to be pip3 installed.
   echo "Preinstalling all chaosindy dependecies defined in requirements.txt and requirements-dev.txt..."
-  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /vagrant/indy-test-automation/chaos/requirements.txt | xargs)"
-  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /vagrant/indy-test-automation/chaos/requirements-dev.txt | xargs)"
+  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /src/indy-test-automation/chaos/requirements.txt | xargs)"
+  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /src/indy-test-automation/chaos/requirements-dev.txt | xargs)"
   # Install chaosindy in the virtualenv
   echo "Installing chaosindy within chaostk virtualenv..."
   # Important - Running the python3 setup.py develop as as the given user
   #             results in a permission denied, because the
   #             indy-test-automation clone is shared from the vagrant host
-  cd /vagrant/indy-test-automation/chaos && /home/${username}/.venvs/chaostk/bin/python3 setup.py develop
+  cd /src/indy-test-automation/chaos && /home/${username}/.venvs/chaostk/bin/python3 setup.py develop
 
   # Force all requirements to be pip3 installed.
   echo "Preinstalling all chaossovtoken dependecies defined in requirements.txt and requirements-dev.txt..."
-  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /vagrant/sovrin-test-automation/chaos/requirements.txt | xargs)"
-  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /vagrant/sovrin-test-automation/chaos/requirements-dev.txt | xargs)"
+  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /src/sovrin-test-automation/chaos/requirements.txt | xargs)"
+  su - ${username} -c "/home/${username}/.venvs/chaostk/bin/pip3 install $(cat /src/sovrin-test-automation/chaos/requirements-dev.txt | xargs)"
   # Install chaossovtoken in the virtualenv
   echo "Installing chaossovtoken within chaostk virtualenv..."
   # Important - Running the python3 setup.py develop as as the given user
   #             results in a permission denied, because the
   #             sovrin-test-automation clone is shared from the vagrant host
-  cd /vagrant/sovrin-test-automation/chaos && /home/${username}/.venvs/chaostk/bin/python3 setup.py develop
+  cd /src/sovrin-test-automation/chaos && /home/${username}/.venvs/chaostk/bin/python3 setup.py develop
 
   # Enhance the .profile 
   profilefile="/home/${username}/.profile"
@@ -188,7 +188,7 @@ do
   # Setup aliases
   # TODO: install indy-test-automation (at minimum) and create aliases for all
   #       monitor-* and reset-* scripts found in the
-  #       /vagrant/indy-test-automation/chaos/scripts. Doing so allows the repo
+  #       /src/indy-test-automation/chaos/scripts. Doing so allows the repo
   #       to add/remove scripts. Aliases effectively become dynamic when
   #       provisioning on 'vagrant up' and/or 'vagrant up --provision'.
 
@@ -203,13 +203,13 @@ do
   do
     aliasname="cd${repo}"
     if ! grep -q ${aliasname} "${profilefile}"; then
-      echo alias cd${repo}="\"cd /vagrant/${repo}-test-automation/chaos\"" >> ${profilefile}
-      echo alias run${repo}="\"cd /vagrant/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [\\\"/vagrant/${repo}-test-automation/chaos\\\"]}'\"" >> ${profilefile}
+      echo alias cd${repo}="\"cd /src/${repo}-test-automation/chaos\"" >> ${profilefile}
+      echo alias run${repo}="\"cd /src/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [\\\"/src/${repo}-test-automation/chaos\\\"]}'\"" >> ${profilefile}
       if [ "${run_all_paths}" == "" ]
         then
-          run_all_paths="\\\"/vagrant/${repo}-test-automation/chaos\\\""
+          run_all_paths="\\\"/src/${repo}-test-automation/chaos\\\""
         else
-          run_all_paths="${run_all_paths}, \\\"/vagrant/${repo}-test-automation/chaos\\\""
+          run_all_paths="${run_all_paths}, \\\"/src/${repo}-test-automation/chaos\\\""
         fi
       fi
   done
@@ -220,7 +220,7 @@ do
     # Add runall if run_all_paths is not empty
     if [ ! -z "${run_all_paths}" ]
     then
-      echo alias runall="\"cd /vagrant/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [${run_all_paths}]}'\"" >> ${profilefile}
+      echo alias runall="\"cd /src/indy-test-automation/chaos && ./run.py pool1 --experiments='{\\\"path\\\": [${run_all_paths}]}'\"" >> ${profilefile}
     fi
   fi
 
@@ -237,7 +237,7 @@ do
   do
     aliasname="monitor${monitor}"
     if ! grep -q ${aliasname} "${profilefile}"; then
-      echo alias monitor${monitor}="\"watch -n5 '/vagrant/indy-test-automation/chaos/scripts/monitor-${monitor} 2>/dev/null'\"" >> ${profilefile}
+      echo alias monitor${monitor}="\"watch -n5 '/src/indy-test-automation/chaos/scripts/monitor-${monitor} 2>/dev/null'\"" >> ${profilefile}
     fi
   done
 
@@ -250,7 +250,7 @@ do
   do
     aliasname="reset${reset}"
     if ! grep -q ${aliasname} "${profilefile}"; then
-      echo alias reset${reset}="/vagrant/indy-test-automation/chaos/scripts/reset-${reset}" >> ${profilefile}
+      echo alias reset${reset}="/src/indy-test-automation/chaos/scripts/reset-${reset}" >> ${profilefile}
     fi
   done
 done

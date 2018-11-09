@@ -182,6 +182,9 @@ if !File.exists?("#{ssh_private_key}") ||
   exit 1
 end
 
+# Get a list of development repos
+repos = get_repos_from_properties(properties)
+
 Vagrant.configure("2") do |config|
   # Generate clientiplist 
   (1...(client_node_count.chomp.to_i + 1)).step(1) do |n|
@@ -224,6 +227,21 @@ Vagrant.configure("2") do |config|
         vb.cpus   = client_cpus
         vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
       end
+      repos.each do |key|
+        property_friendly_key = key.gsub("-", ".")
+        path = properties["repos.#{property_friendly_key}.path"]
+        path = File.expand_path(path)
+
+        shared_folder_key = "repos.#{property_friendly_key}.sharedfolder.type"
+        if properties.key?(shared_folder_key)
+          shared_folder_type = properties[shared_folder_key]
+          #puts "Shared folder #{path} will be shared as /src/#{key} using #{shared_folder_type}"
+          cli.vm.synced_folder "#{path}", "/src/#{key}", type: "#{shared_folder_type}"
+        else
+          #puts "Shared folder #{path} will be shared as /src/#{key} using default to what Vagrant deems the best synced folder option for your environment."
+          cli.vm.synced_folder "#{path}", "/src/#{key}"
+        end
+      end
       cli.vm.provision "indy", type: "shell", path: "scripts/client.sh", args: [timezone, nodeipcsvstring, vnc, vnc, repo]
     end
   end
@@ -250,6 +268,21 @@ Vagrant.configure("2") do |config|
         vb.memory = validator_memory
         vb.cpus   = validator_cpus
         vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
+      end
+      repos.each do |key|
+        property_friendly_key = key.gsub("-", ".")
+        path = properties["repos.#{property_friendly_key}.path"]
+        path = File.expand_path(path)
+
+        shared_folder_key = "repos.#{property_friendly_key}.sharedfolder.type"
+        if properties.key?(shared_folder_key)
+          shared_folder_type = properties[shared_folder_key]
+          #puts "Shared folder #{path} will be shared as /src/#{key} using #{shared_folder_type}"
+          validator.vm.synced_folder "#{path}", "/src/#{key}", type: "#{shared_folder_type}"
+        else
+          #puts "Shared folder #{path} will be shared as /src/#{key} using default to what Vagrant deems the best synced folder option for your environment."
+          validator.vm.synced_folder "#{path}", "/src/#{key}"
+        end
       end
       validator.vm.provision "indy", type: "shell", path: "scripts/validator.sh", args: ["Node#{n}", validatorip, nodeport, validatorip, clientport, timezone, nodeipcsvstring, vnc, vnc, repo]
     end

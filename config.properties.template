@@ -53,10 +53,10 @@ validator.count=<VALIDATORCOUNT>
 
 # Client VM Config
 client.box=bento/ubuntu-16.04
-client.cpus='1'
-client.memory='1024'
+client.cpus=1
+client.memory=1024
 
 # Validator VM Config
 validator.box=bento/ubuntu-16.04
-validator.cpus='1'
-validator.memory='1024'
+validator.cpus=1
+validator.memory=1024
