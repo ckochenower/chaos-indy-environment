@@ -18,85 +18,11 @@ to this project.
    highlight OverLength ctermbg=black ctermfg=white guibg=#592929
    match OverLength /\%81v.\+/
    ```
-2. SCM enhancements:
-   Many of the following may be solved with a settings/properties file that gets
-   set when first running `setup`.
-   1. Allow the branch to be set for each repo instead of assuming the default
-   2. Use a clone anywhere on disk by mounting repo clones to /src/<repo> on the
-      VM instead of relying on the auto-mount of the project dir to /vagrant on
-      the VM.
-   The following is a sample properties file that will work with the bash
-   'setup' script. 'path' is required. All other properties are optional.
-   ```
-   # Indy Node
-   repos.indy.node.path=
-   repos.indy.node.url=git@github.com:<USERNAME>/indy-node.git
-   repos.indy.node.git.private.key=~/.ssh/id_rsa
-   repos.indy.node.branch=master
-
-   # Indy Test Automation
-   repos.indy.test.automation.path=
-   repos.indy.test.automation.url=git@github.com:<USERNAME>/indy-test-automation.git
-   repos.indy.test.automation.git.private.key=~/.ssh/id_rsa
-   repos.indy.test.automation.branch=master
-
-   # Sovrin Test Automation
-   repos.sovrin.test.automation.path=
-   repos.sovrin.test.automation.url=git@github.com:<USERNAME>/sovrin-test-automation.git
-   repos.sovrin.test.automation.git.private.key=~/.ssh/id_rsa
-   repos.sovrin.test.automation.branch=master
-   ```
-   **OR**
-   The following is a sample properties file that will work with python version
-   of the 'setup' script. 'path' is required. All other properties are optional.
-   ```
-   [indy.node]
-   Path =
-   Username = 
-   Url = git@github.com:<USERNAME>/indy-node.git
-   PrivateKey = ~/.ssh/id_rsa
-   Branch = master
-
-   [indy.test.automation]
-   Path =
-   Username = 
-   Url = git@github.com:<USERNAME>/indy-test-automation.git
-   PrivateKey = ~/.ssh/id_rsa
-   Branch = master
-
-   [sovrin.test.automation]
-   Path =
-   Username = 
-   Url = git@github.com:<USERNAME>/sovrin-test-automation.git
-   PrivateKey = ~/.ssh/id_rsa
-   Branch = master
-   ```
-   Pseudo Code:
-   for each <repo name> derived from repos.<repo name>.path (bash) or
-   [<repo name>] (python) where '.' is converted '-'. Examples from sample
-   properties files (bash and python) above include: indy.node => indy-node,
-   indy.test.automation => indy-test-automation,
-   sovrin.test.automation => sovrin-test-automation)
-      if 'path' is unset
-         # Check if the clone already exists
-         if the clone (indy-node, indy-test-automation, ...) is present in the
-         vagrant project root directory
-            Capture the path
-         else
-            # Ask if the repo should be cloned or if a clone already exists on
-            # the user's machine
-            if clone exists
-               prompt for the path
-            else
-               if '<USERNAME>' is present in the 'url' property
-                  prompt for the user's github username
-               clone the repo
-         update the 'path' property
-      
 
 # Overview
 Topics covered in this README:
 * Installation
+  * config.properties File
   * Setup - Please consider completing TODOs
   * Virtualbox
   * Vagrant
@@ -110,20 +36,44 @@ Topics covered in this README:
  
 # Installation
 
+# config.properties File
+A `config.properties` file is used to manage/store all configurable options
+within this project. The `config.properties` file is generated from the
+`config.properties.template` file and should never be checked into version
+control (`config.propoerties` is ignored by .gitignore). Please take a moment
+and get familiar with each configurable option (open and read
+config.properties.template). You do not need to modify the `config.properties`
+file unless you need to add additional repos containing Chaos experiment
+modules/source/etc.
+
 # Source Control Management (SCM)
 The standard Github Fork & Pull Request Workflow is required. Fork the following
 projects:
 [**indy-node**](https://github.com/hyperledger/indy-node)
 [**indy-test-automation**](https://github.com/hyperledger/indy-test-automation)
-[**sovrin-test-automation**](https://github.com/sovrin-foundation/sovrin-test-automation)
 
-The `setup` script in the following section will clone the 'default' (typically
-master) branch from _your_ fork of the above repos. If you want to use a
-different branch for one or more of the repos, you can either clone each of the
-repos into the root of this project (same directory as the Vagrantfile) and set
-the branch, or you can let the setup script clone the repos and you can set the
-branch before running `vagrant up`. See the 'SCM enhancements' tasks under the
-TODO section above for a proposed way of improving the setup experience.
+Additional repos can be added to the config.properties file before or after
+running the `setup` script mentioned below. For example, Chaos experiments that
+test Indy Node/Plenum plugin functionality can be added for
+[**sovrin-test-automation**](https://github.com/sovrin-foundation/sovrin-test-automation)
+by copying config.properties.template to config.properties (if and only if it
+does not already exist) and adding the following lines to config.properties:
+
+```
+# Sovrin Test Automation
+repos.sovrin.test.automation.path=
+repos.sovrin.test.automation.url=git@github.com:<USERNAME>/sovrin-test-automation.git
+repos.sovrin.test.automation.git.private.key=~/.ssh/id_rsa
+repos.sovrin.test.automation.branch=master
+```
+
+The `setup` script in the following section will clone the branch configured in
+the config.properties file. The branch defaults to the repo's "default" branch
+if not present in the properties file. If you want to use a different branch for
+one or more of the repos, you can either clone each of the repos and checkout
+the branch, or you can set the `branch` property for each repo
+(repos.\<REPO\>.branch) and let the setup script clone the configured branch
+before you run `vagrant up`.
 
 ## Setup
 Run the setup script. The setup script will do the following:
@@ -132,18 +82,38 @@ Run the setup script. The setup script will do the following:
    directory is included in .gitignore file, because we don't want to
    store keys in git.
 2. Generate an SSH key pair and PEM file in the 'ssh' directory. Each vagrant VM
-   will use this key pair for the vagrant and ubuntu user.
-3. Check that the following three repos have been cloned to the root of this
-   Vagrant project. Note that all files and folders found in the root of this
-   project (where the Vagrantfile is located) are shared (bi-directionally) on
-   each VM in the /vagrant directory. In other words, changes made to these
-   repos while logged into the vagrant VMs are effectively making changes to the
-   clones in the root of this vagrant project. Commits should be authored/pushed
-   from the vagrant host (not from the VM).
+   will use this key pair for the `vagrant` and `ubuntu` user.
+3. Copy the config.properties.template file to config.properties, if and only if
+   it does not already exist.
+4. Check that each of the repos defined in the confg.properties file
+   (repos.<REPO>...) have been cloned to the root of this Vagrant project.
+   If clones do not exist, you will have the option of specifying where the
+   clone exists on disk, or the setup script will prompt you for your username
+   and clone the repo assuming you have a fork at
+   `https://github.com/<USERNAME>/<REPO>.git`.
+
+   Each repo will be mounted to /src/\<REPO\> on each VM.
+
+   Note that all files and folders found in the root of this project (where the
+   Vagrantfile is located) are shared (bi-directionally) on each VM in the
+   /vagrant directory.  In other words, changes made to
+   /vagrant/<REPOS>|<FILES>|<DIRECTORIES> while logged into the vagrant VMs are
+   effectively making changes to repos/files/folders in the root of this Vagrant
+   project on your Vagrant host. The same is true for /src/\<REPO\> depending on
+   the repos.\<REPO\>.sharedfolder.type property set in the config.properties
+   file (not defined by default). When the sharedfolder.type property is not
+   defined, Vagrant's default behavior is to decide the best method of sharing
+   based on your systems capabilities. See Vagrant's
+   [Synced Folders](https://www.vagrantup.com/docs/synced-folders/) feature
+   documentation for details.
+
+   Note: Commits should be authored/pushed from the vagrant host (not from the
+   VM), because you will be a different user and have different keys while
+   logged into the VM.
 
    1. **indy-node**:
-      Shared as /vagrant/indy-node on each VM. Only the client node(s) have a
-      symlink (/home/[vagrant|ubuntu]/indy-node -> /vagrant/indy-node) in the
+      Shared as /src/indy-node on each VM. Only the client node(s) have a
+      symlink (/home/[vagrant|ubuntu]/indy-node -> /src/indy-node) in the
       'vagrant' and 'ubuntu' home directories. The indy-node repo contains a
       perf_processes.py batch script used for load/stress testing and is used by
       Chaos experiments to generate load when needed. The Choas experiments
@@ -151,10 +121,10 @@ Run the setup script. The setup script will do the following:
       the home directory of the the user running chaos experiments.
 
    2. **indy-test-automation**:
-      Shared as /vagrant/indy-test-automation on each VM. A 'cdindy' alias is
+      Shared as /src/indy-test-automation on each VM. A 'cdindy' alias is
       placed in /home/[vagrant|ubuntu]/.profile for convenience. When on client
       machines (i.e. cli1), running 'cdindy' changes directory to
-      /vagrant/indy-test-automation/chaos.
+      /src/indy-test-automation/chaos.
 
       Chaos experiments are found under the 'chaos' directory. This project has
       a 'run.py' script capable of running any/all chaos experiments, even in
@@ -162,32 +132,33 @@ Run the setup script. The setup script will do the following:
       maintained in this repo, because it is assumed (at this time) that all
       experiments either directly or indirectly (i.e. plugins) test
       indy-node/indy-plenum functionality. See
-      '/vagrant/indy-test-automation/run.py --help' for details.
+      '/src/indy-test-automation/run.py --help' for details.
 
-      A run\<repo\> (i.e. replace \<repo\> with indy or sovrin) alias is placed
+      A run\<REPO\> (i.e. replace \<REPO\> with indy or sovrin) alias is placed
       in /home/[vagrant|ubuntu]/.profile for convenience in running _**all**_ of
       the experiments in the given repo. Login to a client (i.e. cli1) and run
       the 'alias' command to list all available aliases and get familiar with
-      run\<repo\> aliases.
+      run\<REPO\> aliases.
 
-      Several monitor\<suffix\> (i.e. replace \<suffix\> with 'all', 'catchup',
+      Several monitor\<SUFFIX\> (i.e. replace \<SUFFIX\> with 'all', 'catchup',
       'master', 'replicas', services', etc.) aliases are placed in
       /home/[vagrant|ubuntu]/.profile for convenience in monitoring aspects of
       the pool, ledgers, etc. Login to a client (i.e. cli1) and run the
       'alias' command to list all available aliases and get familiar with
-      monitor\<suffix\> aliases.
+      monitor\<SUFFIX\> aliases.
 
-      Several reset\<suffix\> (i.e. replace \<suffix\> with 'pool', etc.)
+      Several reset\<SUFFIX\> (i.e. replace \<SUFFIX\> with 'pool', etc.)
       aliases are placed in /home/[vagrant|ubuntu]/.profile for convenience in
       resetting aspects of the pool, ledgers, etc. Login to a client
       (i.e. cli1) and run the 'alias' command to list all available aliases and
-      get familiar with reset\<suffix\> aliases.
+      get familiar with reset\<SUFFIX\> aliases.
 
-   3. **sovrin-test-automation**:
-      Shared as /vagrant/sovrin-test-automation on each VM. A 'cdsovrin' alias
-      is placed in /home/[vagrant|ubuntu]/.profile for convenience. When on
-      client machines (i.e. cli1), running 'cdsovrin' changes directory to
-      /vagrant/sovrin-test-automation/chaos.
+   3. All other repos added will follow the same pattern:
+      **\<REPO\>**:
+      Shared as /src/\<REPO\> on each VM. A 'cd\<REPO\>' alias is placed in
+      /home/[vagrant|ubuntu]/.profile for convenience. When on client machines
+      (i.e. cli1), running 'cd\<REPO\>' changes directory to
+      /src/\<REPO\>/chaos.
 
       Chaos experiments are found under the 'chaos' directory.
 
@@ -207,8 +178,8 @@ Run `vagrant up`
 
 # Login
 
-You can ssh to any of the nodes using either `vagrant ssh \<host\>` or
-`ssh vagrant@127.0.0.1 -p \<port\> -i ./ssh/id_rsa` where `./ssh/id_rsa` is the
+You can ssh to any of the nodes using either `vagrant ssh \<HOST\>` or
+`ssh vagrant@127.0.0.1 -p \<PORT\> -i ./ssh/id_rsa` where `./ssh/id_rsa` is the
 ssh key created by running the setup script. Note that the port may be different
 if the ports are already in use when you run `vagrant up`. Vagrant will pick the
 next available port to map to port 22 if the configured port (in the
@@ -260,32 +231,32 @@ ssh vagrant@127.0.0.1 -p 2203 -i ./ssh/id_rsa
 Login to the client (cli1) and run `alias` to familiarize yourself with aliases
 added for your convenience.
 In summary:
-- **cd\<repo\>** aliases change the working directory to the \<repo\> source
+- **cd\<REPO\>** aliases change the working directory to the \<REPO\> source
   directory mounted on the VM from the vagrant host.
-- **monitor\<suffix\>** aliases monitor aspects of the pool/ledger/etc;
+- **monitor\<SUFFIX\>** aliases monitor aspects of the pool/ledger/etc;
   producing human readable tabluar output refreshed periodically.
-- **reset\<suffix\>** aliases reset aspects of the pool/ledger/etc.
-- **run\<repo\>** aliases run _all_ of the Chaos experiments in a repo.
+- **reset\<SUFFIX\>** aliases reset aspects of the pool/ledger/etc.
+- **run\<REPO\>** aliases run _all_ of the Chaos experiments in a repo.
 
 # Running Experiments
 See ['Executing Experiments'](https://github.com/ckochenower/indy-test-automation/blob/master/chaos/README.md#executing-experiments) for details
 In summary: There are two ways to run an experiment.
 1. Using run.py
    See '/vagrant/indy-test-automation/run.py --help' for details.
-2. Using the scripts/run-\<experiment\> script
+2. Using the scripts/run-\<EXPERIMENT\> script
    Each experiment
-   ('/vagrant/\<repo\>-test-automation/chaos/experiments/\<experiment\>') has a
-   corresponding 'run-<experiment>' script in the 'scripts' directory.
-   ('/vagrant/\<repo\>-test-automation/chaos/scripts/run-\<experiment\>')
-   See the --help output for each 'run-<experiment>' script for details.
+   ('/vagrant/\<REPO\>-test-automation/chaos/experiments/\<EXPERIMENT\>') has a
+   corresponding 'run-<EXPERIMENT>' script in the 'scripts' directory.
+   ('/vagrant/\<REPO\>-test-automation/chaos/scripts/run-\<EXPERIMENT\>')
+   See the --help output for each 'run-<EXPERIMENT>' script for details.
 
 # Writing Experiments
 See the
 [README.md](https://github.com/hyperledger/indy-test-automation/chaos/README.md)
 located in the indy-test-automation/chaos directory for details.
 Finding a similar experiment, copying it
-(\<repo\>/chaos/experiments/\<experiment\>.json) and it's associated 'run' script
-(\<repo\>/chaos/scripts/run-\<experiment\> may be a good start.
+(\<REPO\>/chaos/experiments/\<EXPERIMENT\>.json) and it's associated 'run' script
+(\<REPO\>/chaos/scripts/run-\<EXPERIMENT\> may be a good start.
 
 # Debugging Experiments
 You can place a 'import pdb; pdb.set_trace()' anywhere in python code and the

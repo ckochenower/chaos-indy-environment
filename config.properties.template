@@ -2,7 +2,7 @@
 # -------------------------
 # Each repo included should define the following properties:
 #
-# IMPORTANT: Replace all dashes ('-') with dots in <repo>. For example,
+# IMPORTANT: Replace all dashes ('-') with dots in <REPO>. For example,
 #            'indy-test-automation', becomes 'indy.test.automation' in this
 #            properties file.
 #
@@ -12,38 +12,49 @@
 # Path
 # ~~~~
 # The full path to the cloned repo on your workstation. Leave this blank or
-# undefined and define a development.repos.<repo>.url to have the Vagrantfile
+# undefined and define a development.repos.<REPO>.url to have the Vagrantfile
 # clone the repo for you.
-#repos.<repo>.path=<path to cloned repo directory>
+#repos.<REPO>.path=<PATH TO CLONED REPO DIRECTORY>
 
 # URL
 # ~~~~
-# Where to clone a copy of the repository. You will be prompted for a username if
-# the URL contains "<USERNAME>".
-#repos.<repo>.url=<forked repo url with '<USERNAME>' in it>
+# Where to clone a copy of the repository. You will be prompted for a username
+# if the URL contains "<USERNAME>".
+#repos.<REPO>.url=<forked repo url with '<USERNAME>' in it>
 
 # Branch
 # ~~~~~~
 # The branch to checkout before running CI/CD targets
-#repos.<repo>.branch=<branch>
+#repos.<REPO>.branch=<BRANCH>
+
+# Shared/Synced Folder Type
+# ~~~~~~
+# The method Vagrant will use to sync repo changes. Set this option only if you
+# clearly understand the behavior as outlined in Vagrant's 'Synced Folders'
+# documentation. When left unset, Vagrant will deside the best method based on
+# your system's capabilities.
+#repos.<REPO>.sharedfolder.type=<TYPE>
 
 # Indy Node
 repos.indy.node.path=
 repos.indy.node.url=git@github.com:<USERNAME>/indy-node.git
-repos.indy.node.git.private.key=~/.ssh/id_rsa
-repos.indy.node.branch=master
+repos.indy.node.branch=
+repos.indy.node.sharedfolder.type=
 
 # Indy Test Automation
 repos.indy.test.automation.path=
 repos.indy.test.automation.url=git@github.com:<USERNAME>/indy-test-automation.git
-repos.indy.test.automation.git.private.key=~/.ssh/id_rsa
-repos.indy.test.automation.branch=master
+repos.indy.test.automation.branch=
+repos.indy.test.automation.sharedfolder.type=
 
-# Sovrin Test Automation
-repos.sovrin.test.automation.path=
-repos.sovrin.test.automation.url=git@github.com:<USERNAME>/sovrin-test-automation.git
-repos.sovrin.test.automation.git.private.key=~/.ssh/id_rsa
-repos.sovrin.test.automation.branch=master
+# Add additional repos here using the following template; replacing <REPO>:
+# IMPORTANT! - All dashes ('-') in <REPO> names must be changed to dots ('.').
+#              indy-node and indy-test-automation repos above are examples.
+# <REPO> Test Automation
+#repos.<REPO>.path=
+#repos.<REPO>.url=git@github.com:<USERNAME>/sovrin-test-automation.git
+#repos.<REPO>.branch=master
+#repos.<REPO>.sharedfolder.type=
 
 # Number of clients
 client.count=<CLIENTCOUNT>
