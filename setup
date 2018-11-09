@@ -52,7 +52,14 @@ function get_property()
 {
   name=${1}
   #echo "Getting property ${name} from ${DIR}/config.properties..." >&2
-  echo $(grep ^${name} ${DIR}/config.properties | cut -d"=" -f2)
+  match=$(grep ^${name} ${DIR}/config.properties | cut -d"=" -f2)
+  # Turn on globbing extension
+  shopt -s extglob
+  # Trim leading and trailing whitespace
+  match="${match##*([[:space:]])}"
+  echo "${match%%*([[:space:]])}"
+  # Turn off globbing extension
+  shopt -u extglob
 }
 
 function set_property()
@@ -221,10 +228,21 @@ do
         url="https://github.com/${github_username}/${repo}.git"
         set_property "${github_url_property}" ${url}
 
+        # Get the branch property
+        branch_property="repos.${encoded_repo_name}.branch"
+        branch=$(get_property ${branch_property})
+        branch_switch=""
+        if [ ! -z "${branch}" ]
+        then
+          # Set the branch switch if the branch is defined and not blank
+          branch_switch="-b ${branch}"
+        fi
+
         # Clone the repo
         echo "Cloning the ${repo} repo from ${url}..."
         clonedir="${DIR}/${repo}"
-        if ! git clone ${url} ${clonedir}
+        echo "Command: git clone ${url} ${branch_switch} ${clonedir}"
+        if ! git clone ${url} ${branch_switch} ${clonedir}
         then
           echo "Failed to clone ${repo} from ${url}."
           echo "Please correct the ${github_username_property} and/or ${github_url_property} property in ${DIR}/config.properties and run setup again."
